@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunny Hop Coding Adventure</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐰 Bunny Hop Coding Adventure 🐰</h1>
+            <div class="level-selector">
+                <label for="levelSelect">Level:</label>
+                <select id="levelSelect">
+                    <!-- Levels will be populated dynamically by main.js -->
+                </select>
+                <button id="replayBtn" class="btn-secondary">🔄 Replay Level</button>
+            </div>
+        </header>
+
+        <div class="game-container">
+            <div class="code-panel">
+                <div class="code-header">
+                    <h2>🐍 Python Code</h2>
+                    <div class="code-actions">
+                        <button id="runBtn" class="btn-primary">▶️ Run Code</button>
+                        <button id="resetBtn" class="btn-secondary">🔄 Reset</button>
+                        <button id="hintBtn" class="btn-hint">💡 Hint</button>
+                    </div>
+                </div>
+                <div class="code-editor-wrapper">
+                    <textarea id="codeEditor" spellcheck="false"></textarea>
+                </div>
+                <div class="code-help">
+                    <h3>Available Functions:</h3>
+                    <ul>
+                        <li><code>move_right(steps)</code> - Move bunny right</li>
+                        <li><code>move_left(steps)</code> - Move bunny left</li>
+                        <li><code>jump()</code> - Make bunny jump</li>
+                        <li><code>wait(seconds)</code> - Wait before next action</li>
+                        <li><code>collect()</code> - Collect item at current position</li>
+                        <li><code>get_position()</code> - Get bunny's (x, y) position</li>
+                        <li><code>get_carrot_count()</code> - Get number of items collected</li>
+                        <li><code>is_on_ground()</code> - Check if bunny is on ground</li>
+                        <li><code>can_jump()</code> - Check if bunny can jump</li>
+                    </ul>
+                    <p><strong>Python Features:</strong> You can use loops (<code>for</code>, <code>while</code>) and conditionals (<code>if</code>, <code>elif</code>, <code>else</code>)!</p>
+                </div>
+            </div>
+
+            <div class="game-panel">
+                <div class="game-header">
+                    <div class="game-stats">
+                        <span>Carrots: <span id="carrotCount">0</span></span>
+                        <span>Moves: <span id="moveCount">0</span></span>
+                        <span>Time: <span id="timeCount">0</span>s</span>
+                    </div>
+                </div>
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+                <div id="gameMessage" class="game-message"></div>
+            </div>
+        </div>
+
+        <div class="instructions-panel">
+            <h3>📋 Level Instructions</h3>
+            <div id="instructions"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <script src="game.js"></script>
+    <script src="levels.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
+
