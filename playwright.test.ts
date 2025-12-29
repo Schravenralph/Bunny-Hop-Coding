@@ -1,14 +1,14 @@
 // Playwright end-to-end test for Bunny Hop Coding Adventure
-const { test, expect } = require('@playwright/test');
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+import { test, expect, Page } from '@playwright/test';
+import * as http from 'http';
+import * as fs from 'fs';
+import * as path from 'path';
 
-let server;
+let server: http.Server | undefined;
 let serverPort = 3000;
 
 // Start a simple HTTP server to serve the files
-function startServer() {
+function startServer(): Promise<void> {
   return new Promise((resolve, reject) => {
     server = http.createServer((req, res) => {
       let filePath = '.' + req.url;
@@ -22,23 +22,23 @@ function startServer() {
         }
         
         const ext = path.extname(filePath);
-        const contentType = {
+        const contentType: Record<string, string> = {
           '.html': 'text/html',
           '.js': 'application/javascript',
           '.css': 'text/css',
           '.json': 'application/json'
-        }[ext] || 'text/plain';
+        };
         
-        res.writeHead(200, { 'Content-Type': contentType });
+        res.writeHead(200, { 'Content-Type': contentType[ext] || 'text/plain' });
         res.end(data);
       });
     });
     
-    const tryListen = (port) => {
+    const tryListen = (port: number): void => {
       // Remove any existing error listeners to avoid duplicates
-      server.removeAllListeners('error');
+      server?.removeAllListeners('error');
       
-      server.once('error', (err) => {
+      server?.once('error', (err: NodeJS.ErrnoException) => {
         if (err.code === 'EADDRINUSE') {
           tryListen(port + 1);
         } else {
@@ -46,7 +46,7 @@ function startServer() {
         }
       });
       
-      server.listen(port, () => {
+      server?.listen(port, () => {
         serverPort = port;
         console.log(`Test server started on port ${serverPort}`);
         resolve();
@@ -57,7 +57,7 @@ function startServer() {
   });
 }
 
-function stopServer() {
+function stopServer(): Promise<void> {
   return new Promise((resolve) => {
     if (!server) {
       resolve();
@@ -92,13 +92,13 @@ test.afterAll(async () => {
 test.setTimeout(120000); // 2 minutes for Pyodide to load
 
 // Improved helper to wait for Pyodide with proper error detection and timeout handling
-async function waitForPyodide(page, maxWait = 90000) {
+async function waitForPyodide(page: Page, maxWait = 90000): Promise<void> {
   const startTime = Date.now();
-  const consoleMessages = [];
-  const errors = [];
+  const consoleMessages: string[] = [];
+  const errors: string[] = [];
   
   // Set up listeners BEFORE navigation/loading
-  const consoleListener = (msg) => {
+  const consoleListener = (msg: { text: () => string; type: () => string }) => {
     const text = msg.text();
     consoleMessages.push(text);
     if (msg.type() === 'error') {
@@ -106,7 +106,7 @@ async function waitForPyodide(page, maxWait = 90000) {
     }
   };
   
-  const errorListener = (error) => {
+  const errorListener = (error: Error) => {
     errors.push(error.message);
   };
   
@@ -118,7 +118,7 @@ async function waitForPyodide(page, maxWait = 90000) {
     while ((Date.now() - startTime) < maxWait) {
       // Check if Pyodide is loaded
       const loaded = await page.evaluate(() => {
-        return window.pyodide !== undefined;
+        return (window as any).pyodide !== undefined;
       }).catch(() => false);
       
       if (loaded) {
@@ -128,7 +128,7 @@ async function waitForPyodide(page, maxWait = 90000) {
         // Verify it's actually functional
         const functional = await page.evaluate(() => {
           try {
-            return window.pyodide && typeof window.pyodide.runPython === 'function';
+            return (window as any).pyodide && typeof (window as any).pyodide.runPython === 'function';
           } catch {
             return false;
           }
@@ -146,7 +146,7 @@ async function waitForPyodide(page, maxWait = 90000) {
       if (consoleMessages.some(msg => msg.includes('Pyodide loaded successfully'))) {
         // Give it a moment to set window.pyodide
         await page.waitForTimeout(1000);
-        const stillLoaded = await page.evaluate(() => window.pyodide !== undefined).catch(() => false);
+        const stillLoaded = await page.evaluate(() => (window as any).pyodide !== undefined).catch(() => false);
         if (stillLoaded) {
           page.off('console', consoleListener);
           page.off('pageerror', errorListener);
@@ -187,10 +187,10 @@ async function waitForPyodide(page, maxWait = 90000) {
 
 test('Application loads and Pyodide initializes', async ({ page }) => {
   // Track console messages and errors
-  const consoleMessages = [];
-  const errors = [];
+  const consoleMessages: string[] = [];
+  const errors: string[] = [];
   
-  const consoleListener = (msg) => {
+  const consoleListener = (msg: { text: () => string; type: () => string }) => {
     const text = msg.text();
     consoleMessages.push(text);
     if (msg.type() === 'error') {
@@ -198,7 +198,7 @@ test('Application loads and Pyodide initializes', async ({ page }) => {
     }
   };
   
-  const errorListener = (error) => {
+  const errorListener = (error: Error) => {
     errors.push(error.message);
   };
   
@@ -220,7 +220,7 @@ test('Application loads and Pyodide initializes', async ({ page }) => {
     
     // Check that game is initialized
     await page.waitForFunction(() => {
-      return window.game !== undefined;
+      return (window as any).game !== undefined;
     }, { timeout: 10000 });
     
     // Check that level selector is populated
@@ -263,13 +263,13 @@ test('Can run simple Python code', async ({ page }) => {
   
   await waitForPyodide(page);
   
-  const errors = [];
-  const consoleListener = (msg) => {
+  const errors: string[] = [];
+  const consoleListener = (msg: { text: () => string; type: () => string }) => {
     if (msg.type() === 'error') {
       errors.push(msg.text());
     }
   };
-  const errorListener = (error) => {
+  const errorListener = (error: Error) => {
     errors.push(error.message);
   };
   
@@ -278,7 +278,7 @@ test('Can run simple Python code', async ({ page }) => {
   
   try {
     // Get initial bunny position
-    const initialX = await page.evaluate(() => window.game.bunny.x);
+    const initialX = await page.evaluate(() => (window as any).game.bunny.x);
     
     // Enter simple code
     await page.fill('#codeEditor', 'move_right(10)');
@@ -291,7 +291,7 @@ test('Can run simple Python code', async ({ page }) => {
       page.waitForSelector('button:has-text("▶️ Run Code")', { timeout: 20000 }),
       page.waitForFunction(() => {
         const btn = document.querySelector('#runBtn');
-        return btn && !btn.disabled && btn.textContent.includes('Run Code');
+        return btn && !(btn as HTMLButtonElement).disabled && btn.textContent?.includes('Run Code');
       }, { timeout: 20000 })
     ]);
     
@@ -299,7 +299,7 @@ test('Can run simple Python code', async ({ page }) => {
     await page.waitForTimeout(1500);
     
     // Check that bunny moved
-    const finalX = await page.evaluate(() => window.game.bunny.x);
+    const finalX = await page.evaluate(() => (window as any).game.bunny.x);
     
     // Check for critical errors (especially import errors)
     const errorMessages = errors.filter(e => 
@@ -334,13 +334,13 @@ test('Can run code with jump', async ({ page }) => {
   
   await waitForPyodide(page);
   
-  const errors = [];
-  const consoleListener = (msg) => {
+  const errors: string[] = [];
+  const consoleListener = (msg: { text: () => string; type: () => string }) => {
     if (msg.type() === 'error') {
       errors.push(msg.text());
     }
   };
-  const errorListener = (error) => {
+  const errorListener = (error: Error) => {
     errors.push(error.message);
   };
   
@@ -350,10 +350,10 @@ test('Can run code with jump', async ({ page }) => {
   try {
     // Get initial bunny state
     const initialState = await page.evaluate(() => ({
-      y: window.game.bunny.y,
-      vy: window.game.bunny.vy,
-      onGround: window.game.bunny.onGround,
-      groundY: window.game.groundY
+      y: (window as any).game.bunny.y,
+      vy: (window as any).game.bunny.vy,
+      onGround: (window as any).game.bunny.onGround,
+      groundY: (window as any).game.groundY
     }));
     
     // Enter code with jump - ensure bunny is on ground first
@@ -367,7 +367,7 @@ test('Can run code with jump', async ({ page }) => {
       page.waitForSelector('button:has-text("▶️ Run Code")', { timeout: 20000 }),
       page.waitForFunction(() => {
         const btn = document.querySelector('#runBtn');
-        return btn && !btn.disabled && btn.textContent.includes('Run Code');
+        return btn && !(btn as HTMLButtonElement).disabled && btn.textContent?.includes('Run Code');
       }, { timeout: 20000 })
     ]);
     
@@ -381,11 +381,11 @@ test('Can run code with jump', async ({ page }) => {
     
     // Check if game is running and bunny state
     const gameState = await page.evaluate(() => ({
-      isRunning: window.game.isRunning,
-      bunnyY: window.game.bunny.y,
-      bunnyVy: window.game.bunny.vy,
-      onGround: window.game.bunny.onGround,
-      jumping: window.game.bunny.jumping
+      isRunning: (window as any).game.isRunning,
+      bunnyY: (window as any).game.bunny.y,
+      bunnyVy: (window as any).game.bunny.vy,
+      onGround: (window as any).game.bunny.onGround,
+      jumping: (window as any).game.bunny.jumping
     })).catch(() => null);
     
     // If game isn't running, the jump might have completed already
@@ -393,11 +393,11 @@ test('Can run code with jump', async ({ page }) => {
     for (let i = 0; i < 40; i++) {
       await page.waitForTimeout(100);
       const currentState = await page.evaluate(() => ({
-        y: window.game.bunny.y,
-        vy: window.game.bunny.vy,
-        onGround: window.game.bunny.onGround,
-        jumping: window.game.bunny.jumping,
-        isRunning: window.game.isRunning
+        y: (window as any).game.bunny.y,
+        vy: (window as any).game.bunny.vy,
+        onGround: (window as any).game.bunny.onGround,
+        jumping: (window as any).game.bunny.jumping,
+        isRunning: (window as any).game.isRunning
       })).catch(() => null);
       
       if (currentState) {
@@ -468,13 +468,13 @@ test('Python functions are available without import errors', async ({ page }) =>
   
   await waitForPyodide(page);
   
-  const errors = [];
-  const consoleListener = (msg) => {
+  const errors: string[] = [];
+  const consoleListener = (msg: { text: () => string; type: () => string }) => {
     if (msg.type() === 'error') {
       errors.push(msg.text());
     }
   };
-  const errorListener = (error) => {
+  const errorListener = (error: Error) => {
     errors.push(error.message);
   };
   
@@ -491,7 +491,7 @@ test('Python functions are available without import errors', async ({ page }) =>
       page.waitForSelector('button:has-text("▶️ Run Code")', { timeout: 20000 }),
       page.waitForFunction(() => {
         const btn = document.querySelector('#runBtn');
-        return btn && !btn.disabled && btn.textContent.includes('Run Code');
+        return btn && !(btn as HTMLButtonElement).disabled && btn.textContent?.includes('Run Code');
       }, { timeout: 20000 })
     ]);
     
@@ -500,7 +500,7 @@ test('Python functions are available without import errors', async ({ page }) =>
     // Test that Python functions are available
     const result = await page.evaluate(async () => {
       try {
-        const testResult = window.pyodide.runPython(`
+        const testResult = (window as any).pyodide.runPython(`
 try:
     move_right(5)
     result = "success"
@@ -509,7 +509,7 @@ except Exception as e:
 result
         `);
         return testResult;
-      } catch (e) {
+      } catch (e: any) {
         return `error: ${e.message}`;
       }
     });
@@ -542,13 +542,13 @@ test('Can use multiple Python functions in sequence', async ({ page }) => {
   // Use the improved waitForPyodide which has proper error handling
   await waitForPyodide(page, 60000);
   
-  const errors = [];
-  const consoleListener = (msg) => {
+  const errors: string[] = [];
+  const consoleListener = (msg: { text: () => string; type: () => string }) => {
     if (msg.type() === 'error') {
       errors.push(msg.text());
     }
   };
-  const errorListener = (error) => {
+  const errorListener = (error: Error) => {
     errors.push(error.message);
   };
   
@@ -557,7 +557,7 @@ test('Can use multiple Python functions in sequence', async ({ page }) => {
   
   try {
     // Get initial position
-    const initialX = await page.evaluate(() => window.game.bunny.x);
+    const initialX = await page.evaluate(() => (window as any).game.bunny.x);
     
     // Enter code with multiple functions
     await page.fill('#codeEditor', 'move_right(5)\nmove_right(5)');
@@ -570,7 +570,7 @@ test('Can use multiple Python functions in sequence', async ({ page }) => {
       page.waitForSelector('button:has-text("▶️ Run Code")', { timeout: 20000 }),
       page.waitForFunction(() => {
         const btn = document.querySelector('#runBtn');
-        return btn && !btn.disabled && btn.textContent.includes('Run Code');
+        return btn && !(btn as HTMLButtonElement).disabled && btn.textContent?.includes('Run Code');
       }, { timeout: 20000 })
     ]);
     
@@ -578,7 +578,7 @@ test('Can use multiple Python functions in sequence', async ({ page }) => {
     await page.waitForTimeout(1500);
     
     // Check final position
-    const finalX = await page.evaluate(() => window.game.bunny.x);
+    const finalX = await page.evaluate(() => (window as any).game.bunny.x);
     
     // Check for import errors
     const importErrors = errors.filter(e => 
@@ -599,3 +599,4 @@ test('Can use multiple Python functions in sequence', async ({ page }) => {
     page.off('pageerror', errorListener);
   }
 });
+

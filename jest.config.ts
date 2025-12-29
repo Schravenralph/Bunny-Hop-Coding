@@ -1,8 +1,10 @@
-module.exports = {
+import type { Config } from 'jest';
+
+const config: Config = {
   displayName: 'bunny-hop-coding',
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
   },
@@ -11,7 +13,8 @@ module.exports = {
   },
   testMatch: [
     '**/*.test.ts',
-    '**/*.test.tsx'
+    '**/*.test.tsx',
+    '**/*.test.js'
   ],
   collectCoverageFrom: [
     'src/**/*.ts',
@@ -19,4 +22,6 @@ module.exports = {
     '!src/**/*.spec.ts'
   ]
 };
+
+export default config;
 

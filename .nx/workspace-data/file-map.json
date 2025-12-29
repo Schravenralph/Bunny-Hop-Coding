@@ -1,0 +1,277 @@
+{
+  "version": "6.0",
+  "nxVersion": "19.8.14",
+  "deps": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@babel/preset-typescript": "^7.23.0",
+    "@nx/js": "^19.0.0",
+    "@nx/webpack": "^19.0.0",
+    "@nx/workspace": "^19.0.0",
+    "@playwright/test": "^1.57.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "nx": "^19.0.0",
+    "playwright": "^1.57.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.3.0",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.0"
+  },
+  "pathMappings": {},
+  "nxJsonPlugins": [],
+  "fileMap": {
+    "projectFileMap": {
+      "bunny-hop-coding": [
+        {
+          "file": ".babelrc",
+          "hash": "2272985656613162251"
+        },
+        {
+          "file": ".gitignore",
+          "hash": "17041905597602116762"
+        },
+        {
+          "file": "COPILOTS.md",
+          "hash": "9569321006317801791"
+        },
+        {
+          "file": "LICENSE",
+          "hash": "15553496959705771468"
+        },
+        {
+          "file": "README.md",
+          "hash": "4726032429072441522"
+        },
+        {
+          "file": "docs/01-architecture/architecture.md",
+          "hash": "11530608381509466823"
+        },
+        {
+          "file": "docs/01-architecture/components.md",
+          "hash": "976417909546947725"
+        },
+        {
+          "file": "docs/02-development/README.md",
+          "hash": "3384080471086172375"
+        },
+        {
+          "file": "docs/03-game-design/levels.md",
+          "hash": "4791351986548057868"
+        },
+        {
+          "file": "docs/03-game-design/mechanics.md",
+          "hash": "13744391756439581158"
+        },
+        {
+          "file": "docs/03-testing/README.md",
+          "hash": "3815420368960579329"
+        },
+        {
+          "file": "docs/04-api/python-api.md",
+          "hash": "8766407983854205462"
+        },
+        {
+          "file": "docs/04-policies/README.md",
+          "hash": "5935288150474930443"
+        },
+        {
+          "file": "docs/04-policies/playwright-test-timeouts.md",
+          "hash": "3817679882751437237"
+        },
+        {
+          "file": "docs/05-product/levels.md",
+          "hash": "4791351986548057868"
+        },
+        {
+          "file": "docs/05-product/mechanics.md",
+          "hash": "13744391756439581158"
+        },
+        {
+          "file": "docs/06-adr/README.md",
+          "hash": "9494887511863992357"
+        },
+        {
+          "file": "docs/07-analysis/README.md",
+          "hash": "8137874126491159332"
+        },
+        {
+          "file": "docs/08-api/python-api.md",
+          "hash": "8766407983854205462"
+        },
+        {
+          "file": "docs/09-research/README.md",
+          "hash": "16295764092150926187"
+        },
+        {
+          "file": "docs/09-research/pyodide-react-tailwind-fullstack.md",
+          "hash": "12741406276013520938"
+        },
+        {
+          "file": "docs/09-research/pyodide-vs-alternatives.md",
+          "hash": "11345668621748396131"
+        },
+        {
+          "file": "docs/24-setup/README.md",
+          "hash": "8408567559171988643"
+        },
+        {
+          "file": "docs/80-feature-backlog/README.md",
+          "hash": "3923308650301277756"
+        },
+        {
+          "file": "docs/81-feature-in-progress/README.md",
+          "hash": "4359221656458429755"
+        },
+        {
+          "file": "docs/82-feature-in-review/README.md",
+          "hash": "1078968224285583607"
+        },
+        {
+          "file": "docs/83-feature-done/README.md",
+          "hash": "16648461270088003803"
+        },
+        {
+          "file": "docs/84-feature-blocked/README.md",
+          "hash": "4008701297907231105"
+        },
+        {
+          "file": "docs/85-feature-cancelled/README.md",
+          "hash": "16317426673909530850"
+        },
+        {
+          "file": "docs/README.md",
+          "hash": "8953719829402952475"
+        },
+        {
+          "file": "game.js",
+          "hash": "6588280643200073158"
+        },
+        {
+          "file": "game.test.js",
+          "hash": "18253164531649054600"
+        },
+        {
+          "file": "index.html",
+          "hash": "16648533280890556452"
+        },
+        {
+          "file": "jest.config.js",
+          "hash": "16721459853048352811"
+        },
+        {
+          "file": "jest.config.ts",
+          "hash": "17712931539973154459",
+          "deps": [
+            "npm:jest"
+          ]
+        },
+        {
+          "file": "jest.setup.js",
+          "hash": "1125382207842267392"
+        },
+        {
+          "file": "jest.setup.ts",
+          "hash": "15725263106038876697"
+        },
+        {
+          "file": "levels.js",
+          "hash": "14950454518585332395"
+        },
+        {
+          "file": "levels.test.js",
+          "hash": "6535674106938302683"
+        },
+        {
+          "file": "main.js",
+          "hash": "4037569862825644080"
+        },
+        {
+          "file": "main.test.js",
+          "hash": "7275733608545477720"
+        },
+        {
+          "file": "nx.json",
+          "hash": "6363484632740406175"
+        },
+        {
+          "file": "package-lock.json",
+          "hash": "13761186738479864750"
+        },
+        {
+          "file": "package.json",
+          "hash": "5748600184864607155",
+          "deps": [
+            "npm:@babel/core",
+            "npm:@babel/preset-env",
+            "npm:@playwright/test",
+            "npm:@types/node",
+            "npm:babel-jest",
+            "npm:jest",
+            "npm:jest-environment-jsdom",
+            "npm:playwright"
+          ]
+        },
+        {
+          "file": "playwright.config.ts",
+          "hash": "9918842281297374946",
+          "deps": [
+            "npm:@playwright/test"
+          ]
+        },
+        {
+          "file": "playwright.test.js",
+          "hash": "3564127201641878182",
+          "deps": [
+            "npm:@playwright/test"
+          ]
+        },
+        {
+          "file": "project.json",
+          "hash": "17927136865882861620"
+        },
+        {
+          "file": "src/game.ts",
+          "hash": "8101266891005126365"
+        },
+        {
+          "file": "src/levels.ts",
+          "hash": "1089752246147460665"
+        },
+        {
+          "file": "src/main.ts",
+          "hash": "7889494954863442415"
+        },
+        {
+          "file": "src/types.ts",
+          "hash": "16667841692276623194"
+        },
+        {
+          "file": "style.css",
+          "hash": "13313497900595286896"
+        },
+        {
+          "file": "tsconfig.json",
+          "hash": "6920188283437361657"
+        },
+        {
+          "file": "tsconfig.spec.json",
+          "hash": "607212867968931786"
+        },
+        {
+          "file": "webpack.config.js",
+          "hash": "4602260618644398547"
+        },
+        {
+          "file": "webpack.config.ts",
+          "hash": "11381177353705781574"
+        }
+      ]
+    },
+    "nonProjectFiles": []
+  }
+}

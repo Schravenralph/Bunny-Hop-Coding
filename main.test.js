@@ -27,44 +27,68 @@ global.loadPyodide = jest.fn(() => Promise.resolve({
 
 // Read and evaluate the modules in order
 const gameCode = fs.readFileSync(path.join(__dirname, 'game.js'), 'utf8');
-eval(gameCode);
-// After eval, BunnyHopGame should be in the current scope
-// Store it in global for main.js to access
-if (typeof BunnyHopGame !== 'undefined') {
-    global.BunnyHopGame = BunnyHopGame;
+// Modify game code to expose BunnyHopGame to global
+const modifiedGameCode = gameCode + '\nif (typeof BunnyHopGame !== "undefined") { global.BunnyHopGame = BunnyHopGame; }';
+eval(modifiedGameCode);
+// Verify it's set
+if (typeof global.BunnyHopGame === 'undefined') {
+    throw new Error('BunnyHopGame not found after eval');
 }
 
 const levelsCode = fs.readFileSync(path.join(__dirname, 'levels.js'), 'utf8');
-eval(levelsCode);
-// After eval, levels should be in the current scope
-if (typeof levels !== 'undefined') {
-    global.levels = levels;
+// Modify levels code to expose levels to global
+const modifiedLevelsCode = levelsCode + '\nif (typeof levels !== "undefined") { global.levels = levels; }';
+eval(modifiedLevelsCode);
+// Verify it's set
+if (typeof global.levels === 'undefined') {
+    throw new Error('levels not found after eval');
 }
 
 const mainCode = fs.readFileSync(path.join(__dirname, 'main.js'), 'utf8');
 // Modify main code to use global.BunnyHopGame and global.levels
 // Replace references to BunnyHopGame and levels with global versions
+// Also expose variables to global scope for test access
 const modifiedMainCode = mainCode
     .replace(/new BunnyHopGame\(/g, 'new global.BunnyHopGame(')
-    .replace(/\blevels\b/g, 'global.levels');
+    .replace(/\blevels\b(?!\s*[\.\[])/g, 'global.levels')
+    // Replace variable declarations first
+    .replace(/^let game;/m, 'global.game = undefined;')
+    .replace(/^let pyodide;/m, 'global.pyodide = undefined;')
+    .replace(/^let currentLevel = 1;/m, 'global.currentLevel = 1;')
+    .replace(/^let isExecuting = false;/m, 'global.isExecuting = false;')
+    // Replace variable references (but not property access like pyodide.globals, and not in strings like 'game-message')
+    .replace(/(?<!\.)\bgame\b(?!\s*[\.=\(])(?!-)/g, 'global.game')
+    .replace(/(?<!\.)\bpyodide\b(?!\s*[\.=\(])/g, 'global.pyodide')
+    .replace(/(?<!\.)\bcurrentLevel\b(?!\s*[\.=\(])/g, 'global.currentLevel')
+    .replace(/(?<!\.)\bisExecuting\b(?!\s*[\.=\(])/g, 'global.isExecuting')
+    // Replace standalone assignments (not property access) - do this after variable reference replacement
+    .replace(/(?<!\.)\bgame\s*=\s*(?!global\.)/g, 'global.game = ')
+    .replace(/(?<!\.)\bpyodide\s*=\s*(?!global\.)/g, 'global.pyodide = ')
+    .replace(/(?<!\.)\bcurrentLevel\s*=\s*(?!global\.)/g, 'global.currentLevel = ')
+    .replace(/(?<!\.)\bisExecuting\s*=\s*(?!global\.)/g, 'global.isExecuting = ')
+    // Fix string replacements that were incorrectly changed
+    .replace(/'global\.game'/g, "'game'")
+    .replace(/"global\.game"/g, '"game"')
+    .replace(/`global\.game`/g, '`game`')
+    .replace(/'global\.game-message'/g, "'game-message'")
+    .replace(/"global\.game-message"/g, '"game-message"')
+    .replace(/`global\.game-message`/g, '`game-message`');
+
+// Execute the code - functions will be hoisted and available in this scope
 eval(modifiedMainCode);
 
-// Functions should now be available in the current scope
-// Access them directly (they're function declarations, so they're hoisted)
-const populateLevelSelector = eval('populateLevelSelector');
-const loadLevel = eval('loadLevel');
-const updateStats = eval('updateStats');
-const showMessage = eval('showMessage');
-const showHint = eval('showHint');
-const resetGame = eval('resetGame');
-const getDefaultCode = eval('getDefaultCode');
-const setupPythonEnvironment = eval('setupPythonEnvironment');
-const setupEventListeners = eval('setupEventListeners');
-let game = eval('game');
-let currentLevel = eval('currentLevel');
+// Expose functions to global for spying in tests
+global.loadLevel = loadLevel;
+global.showHint = showHint;
+global.resetGame = resetGame;
+
+// Access variables from global scope
+let game = global.game;
+let currentLevel = global.currentLevel;
+let isExecuting = global.isExecuting;
 
 // Make BunnyHopGame available for tests (it should be from the eval or global)
-const BunnyHopGameForTests = typeof BunnyHopGame !== 'undefined' ? BunnyHopGame : (global.BunnyHopGame || eval('BunnyHopGame'));
+const BunnyHopGameForTests = global.BunnyHopGame;
 
 describe('Main Application Functions', () => {
     let canvas;
@@ -212,7 +236,7 @@ describe('Main Application Functions', () => {
     describe('showHint', () => {
         beforeEach(() => {
             game = new BunnyHopGameForTests(canvas);
-            currentLevel = 1;
+            global.currentLevel = 1;
         });
 
         test('should load hint into code editor', () => {
@@ -313,14 +337,14 @@ describe('Main Application Functions', () => {
         test('should set up Python environment', () => {
             setupPythonEnvironment();
 
-            expect(pyodide.globals.set).toHaveBeenCalledWith('game', expect.any(Object));
-            expect(pyodide.runPython).toHaveBeenCalled();
+            expect(global.pyodide.globals.set).toHaveBeenCalledWith('game', expect.any(Object));
+            expect(global.pyodide.runPython).toHaveBeenCalled();
         });
 
         test('should define Python functions', () => {
             setupPythonEnvironment();
 
-            const pythonCode = pyodide.runPython.mock.calls[0][0];
+            const pythonCode = global.pyodide.runPython.mock.calls[0][0];
             expect(pythonCode).toContain('def move_right');
             expect(pythonCode).toContain('def move_left');
             expect(pythonCode).toContain('def jump');
@@ -348,7 +372,7 @@ describe('Main Application Functions', () => {
             setupEventListeners();
             select.dispatchEvent(changeEvent);
 
-            expect(currentLevel).toBe(2);
+            expect(global.currentLevel).toBe(2);
         });
 
         test('should set up reset button event listener', () => {
@@ -363,28 +387,44 @@ describe('Main Application Functions', () => {
         });
 
         test('should set up replay button event listener', () => {
-            currentLevel = 2;
+            global.currentLevel = 2;
             const replayBtn = document.getElementById('replayBtn');
             const clickEvent = new Event('click');
-            const loadLevelSpy = jest.spyOn(global, 'loadLevel');
+            // Verify that loadLevel is called by checking side effects
+            const originalLoadLevel = loadLevel;
+            let loadLevelCalled = false;
+            let loadLevelArg = null;
+            global.loadLevel = jest.fn((arg) => {
+                loadLevelCalled = true;
+                loadLevelArg = arg;
+                originalLoadLevel(arg);
+            });
 
             setupEventListeners();
             replayBtn.dispatchEvent(clickEvent);
 
-            expect(loadLevelSpy).toHaveBeenCalledWith(2);
-            loadLevelSpy.mockRestore();
+            expect(loadLevelCalled).toBe(true);
+            expect(loadLevelArg).toBe(2);
+            global.loadLevel = originalLoadLevel;
         });
 
         test('should set up hint button event listener', () => {
+            global.currentLevel = 1;
             const hintBtn = document.getElementById('hintBtn');
             const clickEvent = new Event('click');
-            const showHintSpy = jest.spyOn(global, 'showHint');
+            // Verify that showHint is called by checking side effects
+            const originalShowHint = showHint;
+            let showHintCalled = false;
+            global.showHint = jest.fn(() => {
+                showHintCalled = true;
+                originalShowHint();
+            });
 
             setupEventListeners();
             hintBtn.dispatchEvent(clickEvent);
 
-            expect(showHintSpy).toHaveBeenCalled();
-            showHintSpy.mockRestore();
+            expect(showHintCalled).toBe(true);
+            global.showHint = originalShowHint;
         });
     });
 });

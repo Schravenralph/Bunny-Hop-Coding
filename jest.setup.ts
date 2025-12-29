@@ -1,14 +1,17 @@
 // Jest setup file for browser environment simulation
-global.requestAnimationFrame = (callback) => {
-  return setTimeout(callback, 16);
+global.requestAnimationFrame = (callback: FrameRequestCallback): number => {
+  return setTimeout(callback, 16) as unknown as number;
 };
 
-global.cancelAnimationFrame = (id) => {
+global.cancelAnimationFrame = (id: number): void => {
   clearTimeout(id);
 };
 
 // Mock canvas context
-HTMLCanvasElement.prototype.getContext = function(type) {
+HTMLCanvasElement.prototype.getContext = function(
+  type: string,
+  ...args: any[]
+): RenderingContext | null {
   if (type === '2d') {
     return {
       fillStyle: '',
@@ -26,7 +29,7 @@ HTMLCanvasElement.prototype.getContext = function(type) {
       arc: jest.fn(),
       ellipse: jest.fn(),
       clearRect: jest.fn()
-    };
+    } as unknown as CanvasRenderingContext2D;
   }
   return null;
 };

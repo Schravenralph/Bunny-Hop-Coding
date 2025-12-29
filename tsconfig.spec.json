@@ -8,7 +8,7 @@
   "include": [
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
-    "jest.setup.js"
+    "jest.setup.ts"
   ]
 }
 

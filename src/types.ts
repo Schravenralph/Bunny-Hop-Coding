@@ -1,5 +1,7 @@
 // Type definitions for Bunny Hop Coding Adventure
 
+import type { BunnyHopGame } from './game';
+
 export interface Position {
   x: number;
   y: number;

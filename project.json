@@ -16,14 +16,9 @@
         "tsConfig": "tsconfig.json",
         "assets": [
           "index.html",
-          "style.css",
-          {
-            "glob": "**/*",
-            "input": "src",
-            "output": "/"
-          }
+          "style.css"
         ],
-        "webpackConfig": "webpack.config.js"
+        "webpackConfig": "webpack.config.ts"
       }
     },
     "serve": {
@@ -37,7 +32,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage"],
       "options": {
-        "jestConfig": "jest.config.js",
+        "jestConfig": "jest.config.ts",
         "passWithNoTests": true
       }
     },
