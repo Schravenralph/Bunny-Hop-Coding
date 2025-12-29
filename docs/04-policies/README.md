@@ -16,7 +16,8 @@ This directory contains development policies, coding standards, and organization
 
 ## Documents
 
-_Add policy documents here_
+### Testing Policies
+- **[playwright-test-timeouts.md](./playwright-test-timeouts.md)** - Policy for preventing Playwright test hangs and stuck terminal commands. Covers timeout management, cleanup procedures, and best practices for E2E testing with slow-loading resources like Pyodide.
 
 ---
 

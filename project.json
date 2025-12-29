@@ -1,0 +1,53 @@
+{
+  "name": "bunny-hop-coding",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "target": "web",
+        "compiler": "tsc",
+        "outputPath": "dist",
+        "index": "index.html",
+        "main": "src/main.ts",
+        "tsConfig": "tsconfig.json",
+        "assets": [
+          "index.html",
+          "style.css",
+          {
+            "glob": "**/*",
+            "input": "src",
+            "output": "/"
+          }
+        ],
+        "webpackConfig": "webpack.config.js"
+      }
+    },
+    "serve": {
+      "executor": "@nx/webpack:dev-server",
+      "options": {
+        "buildTarget": "bunny-hop-coding:build",
+        "port": 4200
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage"],
+      "options": {
+        "jestConfig": "jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/test-results"],
+      "options": {
+        "config": "playwright.config.ts"
+      }
+    }
+  }
+}
+
